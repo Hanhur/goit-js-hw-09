@@ -1,49 +1,56 @@
-const refs = {
-    start: document.querySelector('[data-start]'),
-    stop: document.querySelector('[data-stop]'),
-    body: document.querySelector('body'),
-};
+class ChangerColor 
+{
+    constructor({ btnStartEl, btnStopEl, bodyEl }) 
+    {
+        this.btnStart = btnStartEl;
+        this.btnStop = btnStopEl;
+        this.color = bodyEl;
 
-const colorChanger = {
-    intervalId: null,
-    isActive: false,
+        this.onChange = null;
+        this.#btnToggle(this.btnStop);
+    }
+
     start() 
     {
-        if (this.isActive) 
-        {
-            return;
-        }
-        this.isActive = true;
+        this.#btnToggle(this.btnStart);
+        this.#btnToggle(this.btnStop);
 
-        this.intervalId = setInterval(() => {
-            bodyBGColorChanger();
+        this.onChange = setInterval(() => {
+            this.color.style.backgroundColor = this.#getRandomHexColor();
         }, 1000);
-
-        refs.start.disabled = true;
-    },
+    }
 
     stop() 
     {
-        clearInterval(this.intervalId);
-        this.isActive = false;
-        refs.start.disabled = false;
-    },
+        this.#btnToggle(this.btnStop);
+        this.#btnToggle(this.btnStart);
+
+        clearInterval(this.onChange);
+    }
+
+    #getRandomHexColor() 
+    {
+        let letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    #btnToggle(btn) 
+    {
+        btn.disabled = !btn.disabled;
+    }
+}
+
+const refs = {
+    btnStartEl: document.querySelector('button[data-start]'),
+    btnStopEl: document.querySelector('button[data-stop]'),
+    bodyEl: document.body,
 };
 
-refs.start.addEventListener('click', () => {
-    colorChanger.start();
-});
+const changerColor = new ChangerColor(refs);
 
-refs.stop.addEventListener('click', () => {
-    colorChanger.stop();
-});
-
-function getRandomHexColor() 
-{
-    return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-}
-
-function bodyBGColorChanger() 
-{
-    refs.body.style.backgroundColor = getRandomHexColor();
-}
+refs.btnStartEl.addEventListener('click', changerColor.start.bind(changerColor));
+refs.btnStopEl.addEventListener('click', changerColor.stop.bind(changerColor));
